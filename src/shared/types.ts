@@ -70,3 +70,11 @@ export interface ProviderStatus {
   lastLatencyMs?: number;
   calls: number;
 }
+
+export interface CacheEntry {
+  label: Label;
+  confidence: number;
+  at: number;
+  /** CSS selector that matched exactly this element, used to hide it before it paints on later visits. */
+  selector?: string;
+}
