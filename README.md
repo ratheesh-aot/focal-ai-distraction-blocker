@@ -15,8 +15,11 @@ The model is selectable in the extension's settings:
 
 | Model | How it is reached | Configuration |
 | --- | --- | --- |
-| **Laya** (Convai, open weights) | Your own laya-api server | Base URL, default `http://localhost:8002`; checkpoint (`english` / `typed-decisions` / `multilingual`) |
-| **Jev** (TypeSafe) | OpenRouter Decisions API | OpenRouter API key; model id, default `~typesafe/jev-latest` |
+| **Jev** (TypeSafe) — **default** | OpenRouter Decisions API | OpenRouter API key; model id, default `~typesafe/jev-latest` |
+| **Laya** (Convai, open weights) — **free** | Your own [Laya local HTTP server](https://github.com/ratheesh-aot/laya-local-http-server) | Base URL, default `http://localhost:8000`; checkpoint (`english` / `typed-decisions` / `multilingual`) |
+
+**Want it free and private?** Follow [docs/laya-local-setup.md](docs/laya-local-setup.md) to run Laya
+on your own computer and point the extension at it.
 
 Design details: [docs/superpowers/specs/2026-10-09-ai-distraction-blocker-design.md](docs/superpowers/specs/2026-10-09-ai-distraction-blocker-design.md)
 
@@ -36,9 +39,13 @@ In Chrome: open `chrome://extensions`, turn on **Developer mode**, click **Load 
 
 Open the extension's **Settings** (toolbar icon → Settings, or right-click → Options):
 
-- **Model** — pick Laya or Jev.
-  - Laya: server URL (default `http://localhost:8002`) and checkpoint. Start laya-api first.
-  - Jev: your OpenRouter API key and model id.
+Settings opens automatically the first time the extension is installed.
+
+- **Model** — pick Jev (default) or Laya.
+  - Jev: your OpenRouter API key ([openrouter.ai/keys](https://openrouter.ai/keys)) and model id.
+    Until a key is entered, only network blocking and the built-in rules run.
+  - Laya: server URL (default `http://localhost:8000`) and checkpoint. See
+    [docs/laya-local-setup.md](docs/laya-local-setup.md).
   - **Test connection** checks the server and shows its latency.
 - **What to block** — one toggle per category.
 - **Cookie banners** — hide and click "Reject all" / "Necessary only" (default), or hide only.
@@ -71,9 +78,29 @@ npm run live-check   # labelled samples through your Laya server: accuracy + lat
                      #   npm run live-check -- http://localhost:8002 typed-decisions
 npm run e2e          # loads dist/ into Chromium and checks a test page end to end
                      #   needs: npm run build, Laya running, npx playwright install chromium
+                     #   Laya URL: LAYA_URL=http://localhost:8000 npm run e2e (default :8002)
 ```
 
-Last live check (english checkpoint, CPU): 12/12 correct, ~0.5 s per element.
+## How accurate is it?
+
+Laya is used zero-shot. On 12 labelled sample elements (`npm run live-check`) it labels all 12
+correctly when the markup carries telling class names (`newsletter-modal`, `OUTBRAIN`, …), at about
+0.5 s per element on a laptop CPU. With class names removed it gets 10 of 12, and several correct
+answers fall below the 0.55 confidence threshold: it stays reliable for ads, cookie banners, the
+article and navigation, and is weak on signup popups and paywalls. The built-in rules catch the
+common versions of those, and the threshold keeps low-confidence guesses from hiding anything.
+
+## Publish to the Chrome Web Store
+
+```bash
+npm run store-assets   # icons + 1280x800 screenshots + 440x280 promo tile (needs Laya running)
+npm run package        # releases/ai-distraction-blocker-<version>.zip
+```
+
+Then follow [docs/store-listing.md](docs/store-listing.md): it has the listing text, permission
+justifications, data-use answers and the asset list. The privacy policy is
+[docs/privacy-policy.md](docs/privacy-policy.md) — publish it at a public URL first. Raise
+`"version"` in `public/manifest.json` for every update.
 
 ## Future work
 
