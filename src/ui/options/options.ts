@@ -22,6 +22,10 @@ function renderCategories(): void {
   );
 }
 
+function showKeyHint(): void {
+  $('jev-key-hint').classList.toggle('has-key', field('jevKey').value.trim() !== '');
+}
+
 function showProviderFields(): void {
   const provider = (form.querySelector('input[name="provider"]:checked') as HTMLInputElement | null)?.value;
   $('laya-fields').hidden = provider !== 'laya';
@@ -42,6 +46,7 @@ function fill(s: Settings): void {
   field('debug').checked = s.debug;
   field('cacheTtlDays').value = String(s.cacheTtlDays);
   showProviderFields();
+  showKeyHint();
 }
 
 function read(): Settings {
@@ -94,6 +99,7 @@ form.addEventListener('change', (e) => {
   if ((e.target as HTMLInputElement).name === 'provider') showProviderFields();
   $('saved').textContent = '';
 });
+field('jevKey').addEventListener('input', showKeyHint);
 field('threshold').addEventListener('input', () => {
   $('threshold-value').textContent = Number(field('threshold').value).toFixed(2);
 });

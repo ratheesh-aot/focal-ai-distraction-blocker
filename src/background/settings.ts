@@ -6,8 +6,9 @@ const KEY = 'settings';
 const LAYA_MODELS = ['english', 'typed-decisions', 'multilingual'] as const;
 
 export const DEFAULT_SETTINGS: Settings = {
-  provider: 'laya',
-  laya: { baseUrl: 'http://localhost:8002', model: 'english' },
+  // Store users get Jev (needs only an OpenRouter key); Laya is the free self-hosted option.
+  provider: 'jev',
+  laya: { baseUrl: 'http://localhost:8000', model: 'english' },
   jev: { apiKey: '', model: '~typesafe/jev-latest' },
   categories: Object.fromEntries(CATEGORIES.map((c) => [c, true])) as Record<Category, boolean>,
   cookieMode: 'reject',
@@ -80,7 +81,6 @@ export function validateSettings(s: Settings): string[] {
   } catch {
     errors.push('Laya server URL must start with http:// or https://');
   }
-  if (s.provider === 'jev' && !s.jev.apiKey) errors.push('An OpenRouter API key is required to use Jev');
   return errors;
 }
 

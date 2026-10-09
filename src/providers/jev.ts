@@ -1,6 +1,6 @@
 import { buildQuestions } from '../shared/labels';
 import type { ElementSummary, Settings, Verdict } from '../shared/types';
-import { fetchJson } from './errors';
+import { fetchJson, ProviderError } from './errors';
 import { parseChoice, type DecisionProvider } from './provider';
 
 export const JEV_URL = 'https://openrouter.ai/api/alpha/decisions';
@@ -15,6 +15,7 @@ export function createJevProvider(
   const questions = buildQuestions();
 
   async function decideOne(state: ElementSummary): Promise<Verdict | null> {
+    if (!cfg.apiKey) throw new ProviderError('auth', 'Add your OpenRouter API key in Settings to use Jev');
     const res = (await fetchJson(
       fetchImpl,
       JEV_URL,

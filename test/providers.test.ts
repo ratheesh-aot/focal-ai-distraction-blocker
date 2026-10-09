@@ -146,6 +146,15 @@ describe('Jev provider', () => {
     ]);
   });
 
+  it('asks for a key instead of calling OpenRouter when none is set', async () => {
+    const f = fakeFetch(() => json({ answers: answer('ad') }));
+    await expect(createJevProvider({ ...jev, apiKey: '' }, f.impl).decide(states(1))).rejects.toMatchObject({
+      kind: 'auth',
+      message: expect.stringMatching(/OpenRouter API key/),
+    });
+    expect(f.calls).toHaveLength(0);
+  });
+
   it('keeps at most 4 requests in flight', async () => {
     const f = fakeFetch(() => json({ answers: answer('ad') }));
     await createJevProvider(jev, f.impl).decide(states(10));

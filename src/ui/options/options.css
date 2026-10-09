@@ -19,3 +19,7 @@ footer { display: flex; align-items: center; justify-content: flex-end; gap: 12p
 .site-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; }
 .site-list button { padding: 2px 10px; font-size: 12px; }
 .add-row input { flex: 1; min-width: 0; width: auto; }
+a { color: var(--accent); }
+code { font-size: 12px; }
+#jev-key-hint { margin: 0; color: var(--warn); }
+#jev-key-hint.has-key { display: none; }

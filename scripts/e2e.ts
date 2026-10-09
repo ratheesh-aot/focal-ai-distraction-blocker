@@ -1,6 +1,6 @@
 // Loads dist/ into Chromium, opens a local test page and checks what the extension did.
 // Needs: npm run build, the Laya server running, and `npx playwright install chromium`.
-// Usage: npm run e2e
+// Usage: npm run e2e            (Laya at http://localhost:8002; override with LAYA_URL=...)
 import { createServer } from 'node:http';
 import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -8,6 +8,7 @@ import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 
 const root = resolve(import.meta.dirname, '..');
+const layaUrl = process.env.LAYA_URL ?? 'http://localhost:8002';
 const dist = join(root, 'dist');
 const page = readFileSync(join(root, 'test/fixtures/e2e.html'));
 
@@ -32,7 +33,21 @@ const check = (name: string, ok: boolean, detail = '') => {
 try {
   let [worker] = context.serviceWorkers();
   worker ??= await context.waitForEvent('serviceworker');
-  console.log(`extension loaded: ${worker.url().split('/')[2]}`);
+  const extensionId = worker.url().split('/')[2];
+  console.log(`extension loaded: ${extensionId}`);
+
+  // A fresh install opens Settings and defaults to Jev without a key: point it at Laya first.
+  const options = await context.newPage();
+  await options.goto(`chrome-extension://${extensionId}/options/index.html`);
+  await options.waitForFunction(() => (document.querySelector('input[name="layaUrl"]') as HTMLInputElement)?.value !== '');
+  check('fresh install defaults to Jev', (await options.inputValue('input[name="provider"]:checked')) === 'jev');
+  check('Jev key hint shown when no key is set', await options.isVisible('#jev-key-hint'));
+  const message = (msg: object) => options.evaluate((m) => chrome.runtime.sendMessage(m), msg);
+  const current = (await message({ type: 'getSettings' })) as Record<string, any>;
+  const saved = (await message({ type: 'saveSettings', settings: { ...current, provider: 'laya', laya: { ...current.laya, baseUrl: layaUrl } } })) as {
+    ok: boolean;
+  };
+  check(`switch to Laya at ${layaUrl}`, saved.ok);
 
   const tab = await context.newPage();
   await tab.goto(`http://127.0.0.1:${port}/`);
@@ -52,14 +67,11 @@ try {
     async () => check('late signup popup hidden by the model', false, `attr=${await hiddenAttr('#late-popup')}`),
   );
 
-  const extensionId = worker.url().split('/')[2];
-  const options = await context.newPage();
-  await options.goto(`chrome-extension://${extensionId}/options/index.html`);
+  await options.reload();
   await options.waitForFunction(() => (document.querySelector('input[name="layaUrl"]') as HTMLInputElement)?.value !== '');
-  check('options page loads settings', (await options.inputValue('input[name="layaUrl"]')) === 'http://localhost:8002');
+  check('options page shows saved settings', (await options.inputValue('input[name="layaUrl"]')) === layaUrl);
 
   // Exclude list: excluding the site stops all hiding there; removing it brings hiding back.
-  const message = (msg: object) => options.evaluate((m) => chrome.runtime.sendMessage(m), msg);
   const added = (await message({ type: 'excludeSite', site: `http://127.0.0.1:${port}/some/page` })) as { excluded: string[] };
   check('exclude adds the normalised host', added.excluded.includes('127.0.0.1'), JSON.stringify(added.excluded));
   await tab.reload();

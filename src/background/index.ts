@@ -34,7 +34,11 @@ chrome.storage.onChanged.addListener((changes, area) => {
   void current().then(applyNetRules);
 });
 
-chrome.runtime.onInstalled.addListener(() => void current().then(applyNetRules));
+chrome.runtime.onInstalled.addListener((details) => {
+  void current().then(applyNetRules);
+  // First install: open Settings so the user can add an OpenRouter key or a Laya server URL.
+  if (details.reason === 'install') void chrome.runtime.openOptionsPage();
+});
 chrome.runtime.onStartup.addListener(() => void current().then(applyNetRules));
 
 async function handle(msg: BackgroundRequest, sender: chrome.runtime.MessageSender): Promise<unknown> {

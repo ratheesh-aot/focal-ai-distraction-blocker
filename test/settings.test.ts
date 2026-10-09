@@ -9,9 +9,9 @@ describe('mergeSettings', () => {
     expect(mergeSettings({ provider: 'x', threshold: 'high', disabledSites: 'a.com' })).toEqual(DEFAULT_SETTINGS);
   });
 
-  it('defaults to Laya on localhost:8002 with every category on', () => {
-    expect(DEFAULT_SETTINGS.provider).toBe('laya');
-    expect(DEFAULT_SETTINGS.laya.baseUrl).toBe('http://localhost:8002');
+  it('defaults to Jev via OpenRouter, Laya on the laya-api default port, every category on', () => {
+    expect(DEFAULT_SETTINGS.provider).toBe('jev');
+    expect(DEFAULT_SETTINGS.laya.baseUrl).toBe('http://localhost:8000');
     expect(DEFAULT_SETTINGS.jev.model).toBe('~typesafe/jev-latest');
     expect(Object.values(DEFAULT_SETTINGS.categories).every(Boolean)).toBe(true);
     expect(DEFAULT_SETTINGS.threshold).toBe(0.55);
@@ -44,8 +44,8 @@ describe('validateSettings', () => {
   it('rejects a Laya URL that is not http(s)', () => {
     expect(validateSettings({ ...DEFAULT_SETTINGS, laya: { ...DEFAULT_SETTINGS.laya, baseUrl: 'localhost:8002' } })).toHaveLength(1);
   });
-  it('requires an OpenRouter key when Jev is selected', () => {
-    expect(validateSettings({ ...DEFAULT_SETTINGS, provider: 'jev' })[0]).toMatch(/OpenRouter API key/);
+  it('lets settings be saved before an OpenRouter key is entered', () => {
+    expect(validateSettings({ ...DEFAULT_SETTINGS, provider: 'jev', jev: { ...DEFAULT_SETTINGS.jev, apiKey: '' } })).toEqual([]);
   });
 });
 

@@ -33,7 +33,10 @@
               <option value="multilingual">multilingual</option>
             </select>
           </label>
-          <p class="muted small">No API key yet — authentication for Laya is planned (see README, Future work).</p>
+          <p class="muted small">Free and private: run the
+            <a href="https://github.com/ratheesh-aot/laya-local-http-server" target="_blank" rel="noopener">Laya local HTTP server</a>
+            on your computer and enter its URL here (default <code>http://localhost:8000</code>).
+            <a href="https://github.com/ratheesh-aot/laya-local-http-server#readme" target="_blank" rel="noopener">Setup guide</a></p>
         </div>
 
         <div id="jev-fields" class="fields">
@@ -43,6 +46,9 @@
           <label>Model id
             <input type="text" name="jevModel" placeholder="~typesafe/jev-latest" spellcheck="false" />
           </label>
+          <p id="jev-key-hint" class="small">Jev needs an OpenRouter API key — create one at
+            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>.
+            Until then only obvious distractions are hidden. Prefer free? Choose Laya above.</p>
         </div>
 
         <div class="inline">
