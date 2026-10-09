@@ -52,6 +52,16 @@ describe('scoreCandidate', () => {
     expect(band(r.score)).not.toBe('ignore');
   });
 
+  it('asks the model about a large floating overlay that has no tell-tale names', () => {
+    const r = scoreCandidate(info({ classes: 'x-a1', text: 'Get 50% off running shoes this week' }, { fixed: true, coverage: 0.35, zIndex: 5000 }));
+    expect(band(r.score)).toBe('ask');
+  });
+
+  it('still ignores small floating elements and sticky headers with no signals', () => {
+    expect(band(scoreCandidate(info({ classes: 'x-a1' }, { fixed: true, coverage: 0.05, zIndex: 5000 })).score)).toBe('ignore');
+    expect(band(scoreCandidate(info({ tag: 'header', text: 'Home News' }, { sticky: true, coverage: 0.08 })).score)).toBe('ignore');
+  });
+
   it('does not treat words like "header" or "shadow" as ad keywords', () => {
     const r = scoreCandidate(info({ classes: 'header shadow-lg loaded' }));
     expect(r.guess).toBeNull();

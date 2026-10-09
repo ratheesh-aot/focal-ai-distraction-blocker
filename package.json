@@ -9,7 +9,9 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "live-check": "tsx scripts/live-model-check.ts",
-    "e2e": "tsx scripts/e2e.ts"
+    "e2e": "tsx scripts/e2e.ts",
+    "store-assets": "tsx scripts/store-assets.ts",
+    "package": "npm run build && node scripts/package.mjs"
   },
   "devDependencies": {
     "@types/chrome": "^0.3.5",

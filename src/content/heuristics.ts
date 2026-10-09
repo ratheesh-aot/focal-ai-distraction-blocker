@@ -2,6 +2,8 @@ import type { CandidateInfo, Category } from '../shared/types';
 
 export const HIDE_NOW = 0.85;
 export const IGNORE_BELOW = 0.15;
+/** Share of the viewport above which an unexplained floating element is sent to the model. */
+const LARGE_OVERLAY = 0.2;
 
 export type Band = 'hide' | 'ask' | 'ignore';
 
@@ -68,7 +70,10 @@ export function scoreCandidate({ summary, features }: CandidateInfo): { score: n
   if (AD_WORD.test(names)) signals.push({ category: 'ad', weight: 0.3 });
   if (POPUP_WORD.test(names)) signals.push({ category: 'signup_modal', weight: 0.3 });
 
-  if (signals.length === 0) return { score: 0, guess: null };
+  if (signals.length === 0) {
+    // A large overlay with no tell-tale names is exactly what the model is for: ask it.
+    return floating && features.coverage >= LARGE_OVERLAY ? { score: 0.3, guess: null } : { score: 0, guess: null };
+  }
 
   const strongest = signals.reduce((a, b) => (b.weight > a.weight ? b : a));
   let score = signals.reduce((sum, s) => sum + s.weight, 0);

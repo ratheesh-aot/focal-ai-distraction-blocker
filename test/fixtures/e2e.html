@@ -30,12 +30,13 @@
   </div>
 
   <script>
-    // A signup popup with no tell-tale class names, injected late: only the model can judge it.
+    // A promo overlay with no tell-tale class names or ids, injected late: the heuristics
+    // can only say "large unexplained overlay", so hiding it needs the model's verdict.
     setTimeout(() => {
       const d = document.createElement('div');
       d.className = 'cb-x9';
-      d.id = 'late-popup';
-      d.innerHTML = "<h2>Don't miss out!</h2><p>Get our best stories delivered to your inbox every morning.</p><button>Subscribe</button><button>No thanks</button>";
+      d.id = 'nl7';
+      d.innerHTML = "<p>Advertisement</p><h2>Get 50% off premium running shoes this week only</h2><a href='https://shop.example-brand.com/deal'>Shop now</a>";
       document.body.appendChild(d);
     }, 800);
   </script>

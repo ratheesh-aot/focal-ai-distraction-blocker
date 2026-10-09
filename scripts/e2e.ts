@@ -61,10 +61,17 @@ try {
   check('article stays visible', await visible('#story'));
   check('site header stays visible', await visible('header'));
 
-  // The late popup needs the Laya model (~1-3 s on CPU).
-  await tab.waitForFunction(() => document.getElementById('late-popup')?.hasAttribute('data-adb-hidden'), null, { timeout: 30_000 }).then(
-    () => check('late signup popup hidden by the model', true),
-    async () => check('late signup popup hidden by the model', false, `attr=${await hiddenAttr('#late-popup')}`),
+  // The late overlay needs the Laya model (~1-3 s on CPU).
+  await tab.waitForFunction(() => document.getElementById('nl7')?.hasAttribute('data-adb-hidden'), null, { timeout: 30_000 }).then(
+    async () => {
+      // Its markup has no tell-tale names, so only a model verdict can hide it.
+      const stats = (await worker.evaluate(
+        (tabId) => chrome.tabs.sendMessage(tabId, { type: 'pageStats' }),
+        (await worker.evaluate(async (u) => (await chrome.tabs.query({ url: `${u}*` }))[0]?.id, `http://127.0.0.1:${port}/`)) as number,
+      )) as { bySource: Record<string, number>; modelCalls: number };
+      check('late promo overlay hidden by the model', (stats.bySource.model ?? 0) >= 1, JSON.stringify(stats.bySource));
+    },
+    async () => check('late promo overlay hidden by the model', false, `attr=${await hiddenAttr('#nl7')}`),
   );
 
   await options.reload();
