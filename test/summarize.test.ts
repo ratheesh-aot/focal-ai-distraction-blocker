@@ -37,6 +37,16 @@ describe('summarize', () => {
     expect(summary.buttons).toHaveLength(6);
   });
 
+  it('leaves out text and buttons that are not rendered', () => {
+    const tabs = Array.from({ length: 8 }, (_, i) => `<button>Tab ${i}</button>`).join('');
+    const { summary } = one(
+      `<div>This website uses cookies.<div style="display: none">${tabs} secret details</div><button>Accept</button></div>`,
+    );
+    expect(summary.buttons).toEqual(['Accept']);
+    expect(summary.text).not.toContain('secret details');
+    expect(summary.text).toContain('This website uses cookies.');
+  });
+
   it('omits empty fields', () => {
     const { summary } = one('<div data-rect="100,100,0,0"></div>');
     expect(summary).not.toHaveProperty('text');

@@ -1,4 +1,5 @@
 import { coverage, domMeasure, viewport as liveViewport, type Measure, type Viewport } from './measure';
+import { visibleText } from './visible';
 
 export const MAX_CANDIDATES = 300;
 const MIN_WIDTH = 50;
@@ -25,7 +26,9 @@ function names(el: Element): string {
 
 function holdsContent(el: Element, bodyTextLength: number): boolean {
   if (el.matches('[role="main"]') || el.querySelector('main, article, [role="main"]')) return true;
-  const len = (el.textContent ?? '').length;
+  // textContent is a cheap upper bound; only measure rendered text when it could matter.
+  if ((el.textContent ?? '').length < CONTENT_MIN_CHARS) return false;
+  const len = visibleText(el).length;
   return len >= CONTENT_MIN_CHARS && bodyTextLength > 0 && len / bodyTextLength > CONTENT_SHARE;
 }
 
@@ -38,7 +41,7 @@ export function findCandidates(doc: Document, opts: FindOptions = {}): Element[]
   const vp = opts.viewport ?? liveViewport();
   const body = doc.body;
   if (!body) return [];
-  const bodyTextLength = (body.textContent ?? '').length;
+  const bodyTextLength = visibleText(body).length;
   const roots = opts.roots ?? [body];
   const found: Element[] = [];
   let lastFloating: Element | null = null;

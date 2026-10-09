@@ -52,4 +52,14 @@ describe('findCandidates', () => {
     const many = Array.from({ length: 400 }, (_, i) => `<div class="ad-${i} ad" data-rect="100,100,0,0">x</div>`).join('');
     expect(find(loadHtml(`<body>${many}</body>`))).toHaveLength(300);
   });
+
+  it('ignores hidden text when deciding what is the main content (Cookiebot details tables)', () => {
+    const details = '<tr><td>cookie_name</td><td>Stores the user consent state for the current domain</td></tr>'.repeat(200);
+    const doc = loadHtml(
+      `<body><article data-rect="700,1500,0,0"><p>${'Short story text. '.repeat(30)}</p></article>` +
+        `<div id="CybotCookiebotDialog" data-pos="fixed" data-rect="1000,215,585,0">This website uses cookies.` +
+        `<button>Accept</button><div hidden><table>${details}</table></div></div></body>`,
+    );
+    expect(find(doc)).toContain(doc.getElementById('CybotCookiebotDialog'));
+  });
 });

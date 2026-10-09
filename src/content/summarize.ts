@@ -1,6 +1,7 @@
 import { isAdHost } from '../shared/adDomains';
 import type { CandidateInfo, ElementSummary } from '../shared/types';
 import { coverage, type Measured, type Viewport } from './measure';
+import { isRendered, visibleText } from './visible';
 
 const MAX_TEXT = 300;
 const MAX_CLASSES = 120;
@@ -51,10 +52,11 @@ export function summarize(el: Element, m: Measured, vp: Viewport, pageLocked: bo
   const classes = clean(`${el.id} ${typeof el.className === 'string' ? el.className : ''} ${el.getAttribute('aria-label') ?? ''}`);
   if (classes) summary.classes = classes.slice(0, MAX_CLASSES);
 
-  const text = clean(el.textContent);
+  const text = visibleText(el);
   if (text) summary.text = text.slice(0, MAX_TEXT);
 
   const buttons = [...el.querySelectorAll(BUTTON_SELECTOR)]
+    .filter(isRendered)
     .map((b) => clean(b.textContent) || clean((b as HTMLInputElement).value))
     .filter((t) => t && t.length <= 40)
     .slice(0, MAX_BUTTONS);
