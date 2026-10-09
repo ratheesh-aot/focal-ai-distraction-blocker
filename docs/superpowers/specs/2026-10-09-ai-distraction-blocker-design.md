@@ -12,7 +12,7 @@ and social widgets, paywall overlays and recommendation walls.
 Classification of ambiguous page elements is done by a **typed-decision model**, selectable in
 settings:
 
-- **Laya** (Convai, open weights) — self-hosted HTTP server, configurable base URL + optional API key.
+- **Laya** (Convai, open weights) — self-hosted HTTP server, configurable base URL. No authentication in v1 (see README "Future work").
   Default `http://localhost:8002`.
 - **Jev** (TypeSafe) — via OpenRouter's Decisions API, configurable OpenRouter key + model id.
 
@@ -82,7 +82,7 @@ Manifest V3 extension, TypeScript, built with Vite, tested with Vitest.
 | `shared/types.ts` | `ElementSummary`, `Category`, `Verdict`, `Settings`, message types | — |
 | `shared/labels.ts` | The 10 labels, their criteria text, and the `choice` question builder | types |
 | `providers/provider.ts` | `interface DecisionProvider { decide(states: ElementSummary[]): Promise<Verdict[]> ; health(): Promise<ProviderHealth> }` | types, labels |
-| `providers/laya.ts` | POST `{base}/v1/predict/batch` in chunks ≤ 64; on 404 fall back to sequential `{base}/v1/predict`; optional API key header; `health()` = GET `{base}/health` | provider |
+| `providers/laya.ts` | POST `{base}/v1/predict/batch` in chunks ≤ 64; on 404 fall back to sequential `{base}/v1/predict`; no auth header in v1; `health()` = GET `{base}/health` | provider |
 | `providers/jev.ts` | Parallel (concurrency 4) POSTs to OpenRouter Decisions with Bearer key and model id; `health()` = one tiny decision call | provider |
 | `background/queue.ts` | Collects cache misses per tab for 300 ms, caps 12 per page scan (highest heuristic score first), dispatches one `decide` call, returns verdicts to the tab | provider, cache |
 | `background/cache.ts` | Verdicts keyed `hostname + signature` in `chrome.storage.local`; TTL (default 7 days); max 5,000 entries, LRU eviction; also derives per-site CSS hide lists | types |
@@ -205,7 +205,7 @@ for the popup and undo.
 | Setting | Laya | Jev |
 | --- | --- | --- |
 | Endpoint | Base URL, default `http://localhost:8002` | Fixed `https://openrouter.ai/api/alpha/decisions` |
-| Key | Optional API key (sent as `Authorization: Bearer` and `X-API-Key`) | Required OpenRouter key (Bearer) |
+| Key | None in v1 — the local server runs with auth off. Planned: see README "Future work" | Required OpenRouter key (Bearer) |
 | Model | Checkpoint: `english` (default) / `typed-decisions` / `multilingual` | Model id, default `~typesafe/jev-latest` |
 | Call | `/v1/predict/batch`, chunks ≤ 64; 404 → `/v1/predict` sequential | One request per element, concurrency 4 |
 | Timeout | 15 s | 8 s |
@@ -213,7 +213,7 @@ for the popup and undo.
 `host_permissions`: `<all_urls>` (content script), `https://openrouter.ai/*`, and the configured
 Laya origin requested at runtime via `chrome.permissions.request` when the user saves a new URL
 (default `http://localhost:8002/*` declared up front). Calls are made only from the service worker,
-so the Laya server needs no CORS config and keys never reach page context.
+so the Laya server needs no CORS config and the OpenRouter key never reaches page context.
 
 "Test connection" button in options calls `provider.health()` and shows status + measured
 latency (Laya: `/health` fields `status`, `device`, `loaded`; Jev: round-trip of one tiny decision).
@@ -247,7 +247,7 @@ latency (Laya: `/health` fields `status`, `device`, `loaded`; Jev: round-trip of
 | Model server down / network error | Borderline elements stay visible; popup shows "model offline"; heuristics, cache and network rules keep working |
 | 3 consecutive failures | Back off 60 s before the next model call (per provider) |
 | Timeout | Treated as failure; that batch's elements are not cached, may be retried on next page load |
-| 401/403 | Popup + options show "check API key"; no retries until settings change |
+| 401/403 | Jev: popup + options show "check API key"; no retries until settings change. Laya: shown as "server requires authentication (not supported yet)" |
 | 402/429 (OpenRouter) | Show "quota/rate limited"; back off 5 min |
 | Malformed response / missing answer | Element kept visible; logged in debug mode |
 | Settings invalid (bad URL) | Options page refuses to save, inline error |
@@ -258,7 +258,7 @@ The extension never hides an element because of an error.
 
 - **Unit (Vitest + jsdom)**: heuristics weights & bands on fixture summaries; summarize/signature
   stability; candidate filtering incl. exclusions; cache TTL/LRU; queue batching window, 12-cap,
-  ordering; Laya provider (batch, chunking at 64, 404 fallback, auth header) and Jev provider
+  ordering; Laya provider (batch, chunking at 64, 404 fallback, no auth header sent) and Jev provider
   (concurrency 4, Bearer, response mapping) with mocked `fetch`; cookie reject-button matcher
   (never matches accept wording).
 - **Fixture pages**: a handful of saved static HTML pages (cookie banner, newsletter modal, ad
