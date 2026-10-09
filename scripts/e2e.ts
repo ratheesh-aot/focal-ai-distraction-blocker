@@ -57,6 +57,21 @@ try {
   await options.goto(`chrome-extension://${extensionId}/options/index.html`);
   await options.waitForFunction(() => (document.querySelector('input[name="layaUrl"]') as HTMLInputElement)?.value !== '');
   check('options page loads settings', (await options.inputValue('input[name="layaUrl"]')) === 'http://localhost:8002');
+
+  // Exclude list: excluding the site stops all hiding there; removing it brings hiding back.
+  const message = (msg: object) => options.evaluate((m) => chrome.runtime.sendMessage(m), msg);
+  const added = (await message({ type: 'excludeSite', site: `http://127.0.0.1:${port}/some/page` })) as { excluded: string[] };
+  check('exclude adds the normalised host', added.excluded.includes('127.0.0.1'), JSON.stringify(added.excluded));
+  await tab.reload();
+  await tab.waitForTimeout(1500);
+  check('excluded site: cookie banner left alone', (await hiddenAttr('#consent')) === null);
+  const removed = (await message({ type: 'includeSite', site: '127.0.0.1' })) as { excluded: string[] };
+  check('remove takes the host off the list', !removed.excluded.includes('127.0.0.1'));
+  await tab.reload();
+  await tab.waitForTimeout(1500);
+  check('after removal: cookie banner hidden again (from cache)', !(await visible('#consent')) && (await hiddenAttr('#consent')) === 'cookie_consent');
+  if (process.env.E2E_SCREENSHOTS) await message({ type: 'excludeSite', site: 'dashboard.ngrok.com' });
+
   if (process.env.E2E_SCREENSHOTS) {
     await options.setViewportSize({ width: 800, height: 1400 });
     await options.screenshot({ path: join(process.env.E2E_SCREENSHOTS, 'options.png'), fullPage: true });

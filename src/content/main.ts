@@ -2,6 +2,7 @@ import { send, type ClassifyResponse, type ContentRequest, type InitResponse, ty
 import { hostOf } from '../shared/hostname';
 import type { CacheEntry, CandidateInfo, ProviderStatus, Settings, Verdict, VerdictSource } from '../shared/types';
 import { findCandidates } from './candidates';
+import { applyCachedSelectors } from './cached';
 import { findRejectButton } from './cookies';
 import { band, scoreCandidate } from './heuristics';
 import { Hider, stableSelector } from './hide';
@@ -60,12 +61,16 @@ async function start(): Promise<void> {
   const clickedBanners = new WeakSet<Element>();
   let modelBatches = 0;
 
+  /** Clicks "Reject" / "Necessary only" once per banner, when the settings allow it. */
+  function rejectCookies(banner: Element): void {
+    if (settings.cookieMode !== 'reject' || settings.debug || clickedBanners.has(banner)) return;
+    clickedBanners.add(banner);
+    findRejectButton(banner)?.click();
+  }
+
   function apply(el: Element, info: CandidateInfo, v: Verdict, source: VerdictSource): boolean {
     if (!shouldHide(v, settings)) return false;
-    if (v.label === 'cookie_consent' && settings.cookieMode === 'reject' && !settings.debug && !clickedBanners.has(el)) {
-      clickedBanners.add(el);
-      findRejectButton(el)?.click();
-    }
+    if (v.label === 'cookie_consent') rejectCookies(el);
     h.hide(el, { label: v.label, confidence: v.confidence, source });
     const f = info.features;
     if (f.locksScroll || ((f.fixed || f.sticky) && f.coverage >= 0.3)) h.unlockScroll();
@@ -177,6 +182,7 @@ async function start(): Promise<void> {
   });
 
   const begin = () => {
+    applyCachedSelectors(document, cached, settings, h, rejectCookies);
     queueScan();
     observer.observe(document.documentElement, {
       childList: true,

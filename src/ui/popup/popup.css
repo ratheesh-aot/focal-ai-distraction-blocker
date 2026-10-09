@@ -1,14 +1,22 @@
 body { width: 320px; padding: 14px; display: grid; gap: 12px; }
-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 h1 { font-size: 15px; word-break: break-all; }
 #model { margin: 2px 0 0; font-size: 12px; display: flex; align-items: center; }
-.switch { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.wide { width: 100%; }
+#site-controls { display: grid; gap: 8px; }
+.notice { margin: 0; padding: 8px 10px; border-radius: 6px; background: var(--panel); border: 1px solid var(--warn); font-size: 13px; }
 .big { font-size: 13px; }
 .big strong { font-size: 26px; margin-right: 4px; }
 .counts { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 2px; }
 .counts li { display: flex; justify-content: space-between; font-size: 13px; }
 .small { font-size: 12px; margin: 8px 0 0; }
-.actions { display: flex; gap: 8px; }
-.actions button { flex: 1; }
+#summary .wide { margin-top: 12px; }
+details summary { cursor: pointer; font-weight: 600; font-size: 13px; }
+.site-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 4px; max-height: 160px; overflow-y: auto; }
+.site-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
+.site-list li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.site-list li.current span { font-weight: 600; }
+.site-list button { padding: 2px 8px; font-size: 12px; flex: none; }
+.add-row { display: flex; gap: 6px; margin-top: 8px; }
+.add-row input { flex: 1; min-width: 0; }
 footer { text-align: right; font-size: 12px; }
 footer a { color: var(--accent); }

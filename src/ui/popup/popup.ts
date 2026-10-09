@@ -1,9 +1,10 @@
 import { CATEGORY_NAMES } from '../../shared/labels';
-import { send, type ContentRequest, type PageStats } from '../../shared/messages';
+import { send, type ContentRequest, type ExcludeResponse, type PageStats } from '../../shared/messages';
 import { hostOf, isSiteDisabled } from '../../shared/hostname';
 import type { Category, ProviderStatus, Settings } from '../../shared/types';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 const STATUS_TEXT: Record<ProviderStatus['state'], string> = {
   online: 'online',
@@ -45,6 +46,29 @@ function renderStats(stats: PageStats): void {
   $('sources').textContent = parts.length ? `${parts.join(', ')} · ${stats.modelCalls} model call${stats.modelCalls === 1 ? '' : 's'}` : '';
 }
 
+/** The exclude list with a Remove button per site. */
+function renderExcluded(sites: string[], currentHost: string, onRemove: (site: string) => void): void {
+  $('excluded-count').textContent = String(sites.length);
+  $('excluded-empty').hidden = sites.length > 0;
+  $('excluded-list').replaceChildren(
+    ...sites.map((site) => {
+      const li = document.createElement('li');
+      const isCurrent = !!currentHost && isSiteDisabled(currentHost, [site]);
+      li.classList.toggle('current', isCurrent);
+      const name = document.createElement('span');
+      name.textContent = isCurrent ? `${site} (this site)` : site;
+      name.title = site;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = 'Remove';
+      remove.setAttribute('aria-label', `Remove ${site} from the exclude list`);
+      remove.addEventListener('click', () => onRemove(site));
+      li.append(name, remove);
+      return li;
+    }),
+  );
+}
+
 async function main(): Promise<void> {
   $('open-options').addEventListener('click', (e) => {
     e.preventDefault();
@@ -53,26 +77,58 @@ async function main(): Promise<void> {
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const host = tab?.url ? hostOf(tab.url) : '';
+  const tabId = tab?.id;
   const { status, settings } = await send<{ status: ProviderStatus; settings: Settings }>({ type: 'status' });
   renderModel(settings, status);
 
-  if (!tab?.id || !host) {
+  let excluded = settings.disabledSites;
+  const reloadIfAffected = async (site: string) => {
+    if (tabId !== undefined && host && isSiteDisabled(host, [site])) {
+      await chrome.tabs.reload(tabId);
+      window.close();
+      return true;
+    }
+    return false;
+  };
+  const update = async (msg: { type: 'excludeSite' | 'includeSite'; site: string }) => {
+    excluded = (await send<ExcludeResponse>(msg)).excluded;
+    if (!(await reloadIfAffected(msg.site))) renderExcluded(excluded, host, remove);
+  };
+  const remove = (site: string) => void update({ type: 'includeSite', site });
+  renderExcluded(excluded, host, remove);
+
+  $('add-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = $<HTMLInputElement>('add-input');
+    if (!input.value.trim()) return;
+    void update({ type: 'excludeSite', site: input.value });
+    input.value = '';
+  });
+
+  if (tabId === undefined || !host) {
+    $('site-controls').hidden = true;
     $('summary').hidden = true;
     $('unavailable').hidden = false;
-    $<HTMLInputElement>('site-toggle').disabled = true;
-    for (const b of document.querySelectorAll('button')) b.disabled = true;
+    $<HTMLDetailsElement>('excluded').open = true;
     return;
   }
-  const tabId = tab.id;
   $('host').textContent = host;
 
-  const toggle = $<HTMLInputElement>('site-toggle');
-  toggle.checked = !isSiteDisabled(host, settings.disabledSites);
-  toggle.addEventListener('change', async () => {
-    await send({ type: 'toggleSite', host, enabled: toggle.checked });
-    await chrome.tabs.reload(tabId);
-    window.close();
-  });
+  // An excluded site may be covered by a parent entry (news.example.com by example.com).
+  const coveringEntry = excluded.find((site) => isSiteDisabled(host, [site]));
+  const siteButton = $<HTMLButtonElement>('site-button');
+  if (coveringEntry) {
+    $('excluded-note').hidden = false;
+    $('excluded-note').textContent =
+      coveringEntry === host ? 'Blocker is off on this site.' : `Blocker is off here because ${coveringEntry} is excluded.`;
+    siteButton.textContent = 'Remove from exclude list';
+    siteButton.addEventListener('click', () => remove(coveringEntry));
+    $('summary').hidden = true;
+    return;
+  }
+  siteButton.textContent = 'Disable on this site';
+  siteButton.title = `Add ${host} to the exclude list`;
+  siteButton.addEventListener('click', () => void update({ type: 'excludeSite', site: host }));
 
   const stats = await toTab<PageStats>(tabId, { type: 'pageStats' });
   if (stats) {
@@ -81,20 +137,15 @@ async function main(): Promise<void> {
   }
 
   const { count } = await send<{ count: number }>({ type: 'networkCount', tabId });
-  $('network').textContent = settings.networkBlocking ? `${count} ad request${count === 1 ? '' : 's'} blocked by network rules` : 'Network blocking is off';
+  $('network').textContent = settings.networkBlocking
+    ? `${plural(count, 'ad request')} blocked by network rules`
+    : 'Network blocking is off';
 
   let showing = false;
   $('show-hidden').addEventListener('click', async () => {
     showing = !showing;
     await toTab(tabId, { type: 'showHidden', on: showing });
     $('show-hidden').textContent = showing ? 'Hide again' : 'Show hidden';
-  });
-
-  $('undo').addEventListener('click', async () => {
-    await toTab(tabId, { type: 'undoAll' });
-    await send({ type: 'toggleSite', host, enabled: false });
-    await chrome.tabs.reload(tabId);
-    window.close();
   });
 }
 

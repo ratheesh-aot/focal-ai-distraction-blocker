@@ -45,10 +45,15 @@ Open the extension's **Settings** (toolbar icon → Settings, or right-click →
   The extension never clicks an accept button.
 - **Model confidence needed to hide** — default 0.55. Raise it if real content gets hidden.
 - **Debug mode** — outlines detections with their label, confidence and source instead of hiding them.
-- **Disabled sites** — the extension does nothing on these sites (subdomains included).
+- **Excluded sites** — add a site (host or full URL) or remove one; changes apply immediately. The
+  extension does nothing on excluded sites, subdomains included, and network blocking is off there too.
 
-The toolbar popup shows what was hidden on the current page, the model status, a site on/off switch,
-**Show hidden** and **Undo all on this site**.
+The toolbar popup shows what was hidden on the current page and the model status, with:
+
+- **Disable on this site** — adds the current site to the exclude list and reloads the tab. On an
+  excluded site the button reads **Remove from exclude list**.
+- **Show hidden** — temporarily reveals (and outlines) everything hidden on the page.
+- **Excluded sites** — the full list, each with **Remove**, plus a box to add any site.
 
 ## How fast is it?
 

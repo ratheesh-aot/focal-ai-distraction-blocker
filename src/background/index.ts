@@ -1,12 +1,12 @@
 import { createProvider, type DecisionProvider } from '../providers';
 import { hostOf, isSiteDisabled } from '../shared/hostname';
-import type { BackgroundRequest, ClassifyResponse, InitResponse, SaveResponse } from '../shared/messages';
+import type { BackgroundRequest, ClassifyResponse, ExcludeResponse, InitResponse, SaveResponse } from '../shared/messages';
 import { chromeKV } from '../shared/storage';
 import type { CacheEntry, Settings } from '../shared/types';
 import { VerdictCache } from './cache';
 import { applyNetRules, blockedCount } from './netrules';
 import { DecisionQueue } from './queue';
-import { loadSettings, saveSettings, SETTINGS_KEY, validateSettings } from './settings';
+import { addExcluded, loadSettings, removeExcluded, saveSettings, SETTINGS_KEY, validateSettings } from './settings';
 import { StatusTracker } from './status';
 
 let settings: Settings | null = null;
@@ -90,11 +90,14 @@ async function handle(msg: BackgroundRequest, sender: chrome.runtime.MessageSend
       return { ok: true };
     case 'cacheCount':
       return { count: await cache(s).count() };
-    case 'toggleSite': {
-      const sites = s.disabledSites.filter((x) => x !== msg.host);
-      if (!msg.enabled) sites.push(msg.host);
-      await saveSettings(chromeKV, { ...s, disabledSites: sites });
-      return { ok: true };
+    case 'excludeSite':
+    case 'includeSite': {
+      const disabledSites =
+        msg.type === 'excludeSite' ? addExcluded(s.disabledSites, msg.site) : removeExcluded(s.disabledSites, msg.site);
+      const saved = await saveSettings(chromeKV, { ...s, disabledSites });
+      settings = saved;
+      await applyNetRules(saved);
+      return { excluded: saved.disabledSites } satisfies ExcludeResponse;
     }
     case 'networkCount':
       return { count: await blockedCount(msg.tabId) };

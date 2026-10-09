@@ -59,3 +59,22 @@ describe('load/save', () => {
     expect(await loadSettings(memoryKV())).toEqual(DEFAULT_SETTINGS);
   });
 });
+
+import { addExcluded, removeExcluded } from '../src/background/settings';
+
+describe('exclude list', () => {
+  it('adds a site from a host or a full URL, normalised', () => {
+    expect(addExcluded([], 'https://www.Example.com/page?x=1')).toEqual(['example.com']);
+    expect(addExcluded(['a.com'], 'dashboard.ngrok.com')).toEqual(['a.com', 'dashboard.ngrok.com']);
+  });
+
+  it('does not add duplicates or blanks', () => {
+    expect(addExcluded(['example.com'], 'EXAMPLE.com')).toEqual(['example.com']);
+    expect(addExcluded(['example.com'], '   ')).toEqual(['example.com']);
+  });
+
+  it('removes a site, accepting the same spellings as add', () => {
+    expect(removeExcluded(['a.com', 'example.com'], 'https://www.example.com/')).toEqual(['a.com']);
+    expect(removeExcluded(['a.com'], 'missing.com')).toEqual(['a.com']);
+  });
+});

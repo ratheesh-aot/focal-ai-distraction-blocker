@@ -12,7 +12,8 @@ export type BackgroundRequest =
   | { type: 'testConnection'; settings: Settings }
   | { type: 'clearCache' }
   | { type: 'cacheCount' }
-  | { type: 'toggleSite'; host: string; enabled: boolean }
+  | { type: 'excludeSite'; site: string }
+  | { type: 'includeSite'; site: string }
   | { type: 'networkCount'; tabId: number };
 
 export interface InitResponse {
@@ -24,6 +25,11 @@ export interface InitResponse {
 export interface ClassifyResponse {
   verdicts: Record<string, Verdict>;
   status: ProviderStatus;
+}
+
+/** Reply to excludeSite / includeSite: the exclude list after the change. */
+export interface ExcludeResponse {
+  excluded: string[];
 }
 
 export interface SaveResponse {

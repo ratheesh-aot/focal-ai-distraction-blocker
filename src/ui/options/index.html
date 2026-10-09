@@ -69,9 +69,17 @@
         </label>
         <label class="row">Block known ad servers at the network level <input type="checkbox" name="networkBlocking" /></label>
         <label class="row">Debug mode: outline and label detections instead of hiding <input type="checkbox" name="debug" /></label>
-        <label>Disabled sites <span class="muted">(one per line)</span>
-          <textarea name="disabledSites" spellcheck="false" placeholder="example.com"></textarea>
-        </label>
+      </section>
+
+      <section class="panel">
+        <h2>Excluded sites</h2>
+        <p class="muted small">The blocker does nothing on these sites, including their subdomains. Changes apply immediately.</p>
+        <ul id="excluded-list" class="site-list"></ul>
+        <p id="excluded-empty" class="muted small">No excluded sites.</p>
+        <div class="inline add-row">
+          <input type="text" id="exclude-input" placeholder="example.com or a full URL" aria-label="Site to exclude" spellcheck="false" />
+          <button type="button" id="exclude-add">Add</button>
+        </div>
       </section>
 
       <section class="panel">

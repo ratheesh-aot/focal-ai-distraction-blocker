@@ -25,7 +25,24 @@ const num = (v: unknown, fallback: number) => (typeof v === 'number' && Number.i
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
 export function normaliseSite(site: string): string {
-  return site.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^www\./, '');
+  return site
+    .trim()
+    .toLowerCase()
+    .replace(/^[a-z]+:\/\//, '')
+    .replace(/[/?#].*$/, '')
+    .replace(/:\d+$/, '')
+    .replace(/^www\./, '');
+}
+
+/** Adds a site (host or full URL) to the exclude list; ignores blanks and duplicates. */
+export function addExcluded(list: string[], input: string): string[] {
+  const site = normaliseSite(input);
+  return !site || list.includes(site) ? list : [...list, site];
+}
+
+export function removeExcluded(list: string[], input: string): string[] {
+  const site = normaliseSite(input);
+  return list.filter((s) => s !== site);
 }
 
 /** Stored data → complete, valid Settings. Unknown or corrupt fields fall back to defaults. */

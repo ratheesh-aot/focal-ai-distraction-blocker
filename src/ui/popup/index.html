@@ -8,29 +8,34 @@
 </head>
 <body>
   <header>
-    <div>
-      <h1 id="host">This page</h1>
-      <p id="model" class="muted"><span class="dot"></span><span id="model-text">Checking model…</span></p>
-    </div>
-    <label class="switch" title="Turn the blocker on or off for this site">
-      <input type="checkbox" id="site-toggle" />
-      <span>On</span>
-    </label>
+    <h1 id="host">This page</h1>
+    <p id="model" class="muted"><span class="dot"></span><span id="model-text">Checking model…</span></p>
   </header>
+
+  <p id="unavailable" class="muted" hidden>The blocker does not run on this page.</p>
+
+  <div id="site-controls">
+    <p id="excluded-note" class="notice" hidden>Blocker is off on this site.</p>
+    <button type="button" id="site-button" class="primary wide">Disable on this site</button>
+  </div>
 
   <section id="summary" class="panel">
     <div class="big"><strong id="hidden-count">0</strong> hidden on this page</div>
     <ul id="categories" class="counts"></ul>
     <p id="sources" class="muted small"></p>
     <p id="network" class="muted small"></p>
+    <button type="button" id="show-hidden" class="wide">Show hidden</button>
   </section>
 
-  <p id="unavailable" class="muted" hidden>The blocker does not run on this page.</p>
-
-  <div class="actions">
-    <button type="button" id="show-hidden">Show hidden</button>
-    <button type="button" id="undo">Undo all on this site</button>
-  </div>
+  <details id="excluded">
+    <summary>Excluded sites (<span id="excluded-count">0</span>)</summary>
+    <ul id="excluded-list" class="site-list"></ul>
+    <p id="excluded-empty" class="muted small">No excluded sites.</p>
+    <form id="add-form" class="add-row">
+      <input type="text" id="add-input" placeholder="example.com" aria-label="Site to exclude" spellcheck="false" />
+      <button type="submit">Add</button>
+    </form>
+  </details>
 
   <footer><a href="#" id="open-options">Settings</a></footer>
   <script type="module" src="./popup.ts"></script>

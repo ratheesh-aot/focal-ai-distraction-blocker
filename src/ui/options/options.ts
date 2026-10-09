@@ -1,5 +1,5 @@
 import { CATEGORIES, CATEGORY_NAMES } from '../../shared/labels';
-import { send, type SaveResponse } from '../../shared/messages';
+import { send, type ExcludeResponse, type SaveResponse } from '../../shared/messages';
 import type { ProviderHealth } from '../../providers/provider';
 import type { Category, Settings } from '../../shared/types';
 
@@ -40,7 +40,6 @@ function fill(s: Settings): void {
   $('threshold-value').textContent = s.threshold.toFixed(2);
   field('networkBlocking').checked = s.networkBlocking;
   field('debug').checked = s.debug;
-  field<HTMLTextAreaElement>('disabledSites').value = s.disabledSites.join('\n');
   field('cacheTtlDays').value = String(s.cacheTtlDays);
   showProviderFields();
 }
@@ -56,9 +55,34 @@ function read(): Settings {
     threshold: Number(field('threshold').value),
     networkBlocking: field('networkBlocking').checked,
     debug: field('debug').checked,
-    disabledSites: field<HTMLTextAreaElement>('disabledSites').value.split('\n').map((s) => s.trim()).filter(Boolean),
+    disabledSites: current.disabledSites,
     cacheTtlDays: Number(field('cacheTtlDays').value),
   };
+}
+
+function renderExcluded(): void {
+  const sites = current.disabledSites;
+  $('excluded-empty').hidden = sites.length > 0;
+  $('excluded-list').replaceChildren(
+    ...sites.map((site) => {
+      const li = document.createElement('li');
+      const name = document.createElement('span');
+      name.textContent = site;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = 'Remove';
+      remove.setAttribute('aria-label', `Remove ${site} from the exclude list`);
+      remove.addEventListener('click', () => void changeExcluded({ type: 'includeSite', site }));
+      li.append(name, remove);
+      return li;
+    }),
+  );
+}
+
+async function changeExcluded(msg: { type: 'excludeSite' | 'includeSite'; site: string }): Promise<void> {
+  const { excluded } = await send<ExcludeResponse>(msg);
+  current = { ...current, disabledSites: excluded };
+  renderExcluded();
 }
 
 async function refreshCacheCount(): Promise<void> {
@@ -86,6 +110,20 @@ $('test').addEventListener('click', async () => {
   button.disabled = false;
 });
 
+const addExcluded = () => {
+  const input = $<HTMLInputElement>('exclude-input');
+  if (!input.value.trim()) return;
+  void changeExcluded({ type: 'excludeSite', site: input.value });
+  input.value = '';
+};
+$('exclude-add').addEventListener('click', addExcluded);
+$('exclude-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    addExcluded();
+  }
+});
+
 $('clear-cache').addEventListener('click', async () => {
   await send({ type: 'clearCache' });
   await refreshCacheCount();
@@ -104,6 +142,7 @@ form.addEventListener('submit', async (e) => {
   if (res.ok) {
     current = res.settings;
     fill(current);
+    renderExcluded();
     $('saved').textContent = 'Saved';
   }
 });
@@ -111,4 +150,5 @@ form.addEventListener('submit', async (e) => {
 renderCategories();
 current = await send<Settings>({ type: 'getSettings' });
 fill(current);
+renderExcluded();
 void refreshCacheCount();
