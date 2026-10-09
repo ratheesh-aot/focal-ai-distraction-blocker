@@ -1,4 +1,4 @@
-# AI Distraction Blocker
+# Focal: AI Distraction Blocker
 
 A Chrome extension (Manifest V3) that hides things that distract you from a page's real content:
 ads, cookie consent banners, signup/newsletter modals, sticky/autoplay video, chat and social
@@ -94,7 +94,7 @@ common versions of those, and the threshold keeps low-confidence guesses from hi
 
 ```bash
 npm run store-assets   # icons + 1280x800 screenshots + 440x280 promo tile (needs Laya running)
-npm run package        # releases/ai-distraction-blocker-<version>.zip
+npm run package        # releases/focal-<version>.zip
 ```
 
 Then follow [docs/store-listing.md](docs/store-listing.md): it has the listing text, permission

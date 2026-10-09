@@ -1,8 +1,8 @@
-# Privacy Policy — AI Distraction Blocker
+# Privacy Policy — Focal: AI Distraction Blocker
 
 _Effective date: October 9, 2026_
 
-AI Distraction Blocker ("the extension") hides ads, cookie banners, popups and similar
+Focal: AI Distraction Blocker ("the extension") hides ads, cookie banners, popups and similar
 distractions on web pages. This policy explains what data the extension handles and where it goes.
 
 ## Summary

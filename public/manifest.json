@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "AI Distraction Blocker",
+  "name": "Focal: AI Distraction Blocker",
   "version": "0.1.0",
   "description": "Hides ads, cookie banners, popups and other distractions using the Laya or Jev decision model.",
   "permissions": [
@@ -40,7 +40,7 @@
   },
   "action": {
     "default_popup": "popup/index.html",
-    "default_title": "AI Distraction Blocker",
+    "default_title": "Focal",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",

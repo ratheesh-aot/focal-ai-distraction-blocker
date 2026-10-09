@@ -127,7 +127,7 @@ try {
     `<html><body style="margin:0;${FONT}background:linear-gradient(135deg,#eef1ff,#f7f7f5);width:1280px;height:800px;display:grid;place-items:center">
       <div style="display:grid;gap:28px;justify-items:center">
         <h1 style="margin:0;font-size:34px;color:#1d1d1b">Read the page, not the popups</h1>
-        <div style="display:flex;gap:48px">${frame(png(join(shots, 'before.png')), 'Without', '#c92a2a')}${frame(png(join(shots, 'after.png')), 'With AI Distraction Blocker', '#2b8a3e')}</div>
+        <div style="display:flex;gap:48px">${frame(png(join(shots, 'before.png')), 'Without', '#c92a2a')}${frame(png(join(shots, 'after.png')), 'With Focal', '#2b8a3e')}</div>
       </div></body></html>`,
     1280,
     800,
@@ -150,7 +150,7 @@ try {
     compose,
     `<html><body style="margin:0;${FONT}background:linear-gradient(135deg,${ACCENT},#5c7cfa);width:440px;height:280px;display:flex;align-items:center;gap:22px;padding:0 30px;box-sizing:border-box;color:#fff">
       ${ICON_SVG.replace('<svg ', '<svg width="96" height="96" style="flex:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.25))" ').replace(`fill="${ACCENT}"`, 'fill="#2f49b8"')}
-      <div><div style="font-size:28px;font-weight:700;line-height:1.15">AI Distraction Blocker</div>
+      <div><div style="font-size:40px;font-weight:700;line-height:1">Focal</div><div style="font-size:18px;font-weight:600;margin-top:4px;opacity:.95">AI Distraction Blocker</div>
       <div style="font-size:16px;margin-top:8px;opacity:.92">Hides ads, cookie banners and popups with an AI decision model</div></div>
     </body></html>`,
     440,

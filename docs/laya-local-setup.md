@@ -1,6 +1,6 @@
-# Use AI Distraction Blocker for free with a local Laya server
+# Use Focal for free with a local Laya server
 
-AI Distraction Blocker uses **Jev** (through OpenRouter) by default. That needs an OpenRouter
+Focal: AI Distraction Blocker uses **Jev** (through OpenRouter) by default. That needs an OpenRouter
 API key and costs a tiny amount per page.
 
 If you want it **free and private**, run Convai's open-weight **Laya** model on your own computer

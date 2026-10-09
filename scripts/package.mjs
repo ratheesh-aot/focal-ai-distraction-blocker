@@ -1,5 +1,5 @@
 // Zips dist/ for the Chrome Web Store: manifest.json at the top level of the archive.
-// Usage: npm run package   (builds first) -> releases/ai-distraction-blocker-<version>.zip
+// Usage: npm run package   (builds first) -> releases/focal-<version>.zip
 import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 import JSZip from 'jszip';
@@ -31,6 +31,6 @@ const walk = (dir) => {
 walk(dist);
 
 mkdirSync(join(root, 'releases'), { recursive: true });
-const out = join(root, 'releases', `ai-distraction-blocker-${manifest.version}.zip`);
+const out = join(root, 'releases', `focal-${manifest.version}.zip`);
 writeFileSync(out, await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
 console.log(`${relative(root, out)} — ${Object.keys(zip.files).length} files, version ${manifest.version}`);

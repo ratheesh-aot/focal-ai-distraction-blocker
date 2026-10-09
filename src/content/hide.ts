@@ -59,7 +59,7 @@ export class Hider {
     this.hidden.set(el, rec);
     if (this.opts.debug) {
       el.setAttribute('data-adb-debug', `${rec.label} ${rec.confidence.toFixed(2)} (${rec.source})`);
-      el.setAttribute('title', `AI Distraction Blocker: ${rec.label} ${rec.confidence.toFixed(2)} (${rec.source})`);
+      el.setAttribute('title', `Focal: ${rec.label} ${rec.confidence.toFixed(2)} (${rec.source})`);
     } else {
       el.setAttribute('data-adb-hidden', rec.label);
     }

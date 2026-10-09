@@ -1,23 +1,23 @@
 # Chrome Web Store submission kit
 
 Everything to paste into the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-for **AI Distraction Blocker**. Developer contact: ratheeshspiral09@gmail.com.
+for **Focal: AI Distraction Blocker**. Developer contact: ratheeshspiral09@gmail.com.
 
 ## Before you submit
 
 1. `npm run store-assets` — regenerates icons and store images (needs a local Laya server).
 2. Raise `"version"` in `public/manifest.json` for every upload after the first.
-3. `npm run package` — builds and writes `releases/ai-distraction-blocker-<version>.zip`.
+3. `npm run package` — builds and writes `releases/focal-<version>.zip`.
 4. Publish `docs/privacy-policy.md` at a public URL (for example, push this repo to GitHub and use
    the file's GitHub URL, or GitHub Pages) and fill it in below.
 
 ## Package
 
-Upload `releases/ai-distraction-blocker-<version>.zip`.
+Upload `releases/focal-<version>.zip`.
 
 ## Store listing tab
 
-**Name** (from the manifest): AI Distraction Blocker
+**Name** (from the manifest): Focal: AI Distraction Blocker
 
 **Summary** (manifest `description`, max 132 characters):
 
@@ -32,7 +32,7 @@ Upload `releases/ai-distraction-blocker-<version>.zip`.
 ```
 Read the page, not the popups.
 
-AI Distraction Blocker hides the things that pull you away from what you came to read: ads, cookie consent banners, newsletter and signup popups, floating video players, chat bubbles, social share bars, paywall overlays and "recommended for you" walls.
+Focal hides the things that pull you away from what you came to read: ads, cookie consent banners, newsletter and signup popups, floating video players, chat bubbles, social share bars, paywall overlays and "recommended for you" walls.
 
 HOW IT WORKS
 • Known ad and tracker servers are blocked before they load.
