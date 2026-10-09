@@ -8,3 +8,12 @@ it('normalises hosts: lowercase, strips www', () => {
 it('returns empty string for invalid urls', () => {
   expect(hostOf('nope')).toBe('');
 });
+
+import { isSiteDisabled } from '../src/shared/hostname';
+
+it('treats a disabled site as covering its subdomains only', () => {
+  expect(isSiteDisabled('example.com', ['example.com'])).toBe(true);
+  expect(isSiteDisabled('news.example.com', ['example.com'])).toBe(true);
+  expect(isSiteDisabled('badexample.com', ['example.com'])).toBe(false);
+  expect(isSiteDisabled('example.com', [])).toBe(false);
+});

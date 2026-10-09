@@ -5,3 +5,8 @@ export function hostOf(url: string): string {
     return '';
   }
 }
+
+/** True when `host` equals a disabled site or is one of its subdomains. */
+export function isSiteDisabled(host: string, disabledSites: string[]): boolean {
+  return disabledSites.some((site) => host === site || host.endsWith(`.${site}`));
+}
