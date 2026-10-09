@@ -1,1 +1,97 @@
-<!doctype html><html><head><meta charset="utf-8"><title>options</title></head><body><script type="module" src="./options.ts"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Distraction Blocker Settings</title>
+  <link rel="stylesheet" href="../shared.css" />
+  <link rel="stylesheet" href="./options.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <h1>AI Distraction Blocker</h1>
+      <p class="muted">Hides ads, cookie banners, popups and other things that pull you away from what you came to read.</p>
+    </header>
+
+    <form id="form" novalidate>
+      <section class="panel">
+        <h2>Model</h2>
+        <div class="segmented" role="radiogroup" aria-label="Model provider">
+          <label><input type="radio" name="provider" value="laya" /> Laya <span class="muted">self-hosted</span></label>
+          <label><input type="radio" name="provider" value="jev" /> Jev <span class="muted">via OpenRouter</span></label>
+        </div>
+
+        <div id="laya-fields" class="fields">
+          <label>Laya server URL
+            <input type="url" name="layaUrl" placeholder="http://localhost:8002" spellcheck="false" />
+          </label>
+          <label>Checkpoint
+            <select name="layaModel">
+              <option value="english">english (default)</option>
+              <option value="typed-decisions">typed-decisions</option>
+              <option value="multilingual">multilingual</option>
+            </select>
+          </label>
+          <p class="muted small">No API key yet — authentication for Laya is planned (see README, Future work).</p>
+        </div>
+
+        <div id="jev-fields" class="fields">
+          <label>OpenRouter API key
+            <input type="password" name="jevKey" placeholder="sk-or-..." autocomplete="off" spellcheck="false" />
+          </label>
+          <label>Model id
+            <input type="text" name="jevModel" placeholder="~typesafe/jev-latest" spellcheck="false" />
+          </label>
+        </div>
+
+        <div class="inline">
+          <button type="button" id="test">Test connection</button>
+          <span id="test-result" class="muted" role="status"></span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>What to block</h2>
+        <div id="categories" class="grid"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Behaviour</h2>
+        <label>Cookie banners
+          <select name="cookieMode">
+            <option value="reject">Hide, then click “Reject” / “Necessary only” when found</option>
+            <option value="hide">Hide only</option>
+          </select>
+        </label>
+        <label>Model confidence needed to hide: <strong id="threshold-value"></strong>
+          <input type="range" name="threshold" min="0.3" max="0.95" step="0.05" />
+        </label>
+        <label class="row">Block known ad servers at the network level <input type="checkbox" name="networkBlocking" /></label>
+        <label class="row">Debug mode: outline and label detections instead of hiding <input type="checkbox" name="debug" /></label>
+        <label>Disabled sites <span class="muted">(one per line)</span>
+          <textarea name="disabledSites" spellcheck="false" placeholder="example.com"></textarea>
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>Cache</h2>
+        <label>Remember verdicts for (days)
+          <input type="number" name="cacheTtlDays" min="1" max="90" />
+        </label>
+        <div class="inline">
+          <span id="cache-count" class="muted"></span>
+          <button type="button" id="clear-cache">Clear cache</button>
+        </div>
+      </section>
+
+      <footer>
+        <ul id="errors" class="error"></ul>
+        <span id="saved" class="success" role="status"></span>
+        <button type="submit" class="primary">Save</button>
+      </footer>
+    </form>
+  </main>
+  <script type="module" src="./options.ts"></script>
+</body>
+</html>
