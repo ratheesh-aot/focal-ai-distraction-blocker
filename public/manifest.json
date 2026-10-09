@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "AI Distraction Blocker",
+  "version": "0.1.0",
+  "description": "Hides ads, cookie banners, popups and other distractions using the Laya or Jev decision model.",
+  "permissions": ["storage", "declarativeNetRequest", "declarativeNetRequestFeedback", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [
+    { "matches": ["http://*/*", "https://*/*"], "js": ["content.js"], "run_at": "document_start", "all_frames": false }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [{ "id": "ads", "enabled": true, "path": "rules/ad-domains.json" }]
+  },
+  "action": { "default_popup": "popup/index.html", "default_title": "AI Distraction Blocker" },
+  "options_page": "options/index.html"
+}

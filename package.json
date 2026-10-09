@@ -1,0 +1,21 @@
+{
+  "name": "ai-distraction-blocker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "rules": "node scripts/gen-rules.mjs",
+    "build": "npm run rules && vite build && vite build -c vite.content.config.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "live-check": "tsx scripts/live-model-check.ts"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.5",
+    "jsdom": "^29.1.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
+  }
+}
