@@ -20,6 +20,56 @@ The model is selectable in the extension's settings:
 
 Design details: [docs/superpowers/specs/2026-10-09-ai-distraction-blocker-design.md](docs/superpowers/specs/2026-10-09-ai-distraction-blocker-design.md)
 
+## Build and install
+
+Requires Node 20+.
+
+```bash
+npm install
+npm run build        # outputs the unpacked extension to dist/
+```
+
+In Chrome: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick the
+`dist/` folder. After rebuilding, press the reload icon on the extension card.
+
+## Configure
+
+Open the extension's **Settings** (toolbar icon → Settings, or right-click → Options):
+
+- **Model** — pick Laya or Jev.
+  - Laya: server URL (default `http://localhost:8002`) and checkpoint. Start laya-api first.
+  - Jev: your OpenRouter API key and model id.
+  - **Test connection** checks the server and shows its latency.
+- **What to block** — one toggle per category.
+- **Cookie banners** — hide and click "Reject all" / "Necessary only" (default), or hide only.
+  The extension never clicks an accept button.
+- **Model confidence needed to hide** — default 0.55. Raise it if real content gets hidden.
+- **Debug mode** — outlines detections with their label, confidence and source instead of hiding them.
+- **Disabled sites** — the extension does nothing on these sites (subdomains included).
+
+The toolbar popup shows what was hidden on the current page, the model status, a site on/off switch,
+**Show hidden** and **Undo all on this site**.
+
+## How fast is it?
+
+On a Windows laptop CPU, laya-api answers in roughly **0.5–0.8 s per element** when batched
+(about 2.6 s for a single request). Pages never wait for it: obvious distractions are hidden
+immediately by heuristics, borderline ones are sent in one batch of at most 12 per scan, and every
+verdict is cached per site for 7 days, so repeat visits make no model calls.
+
+## Development
+
+```bash
+npm test             # unit tests (Vitest + jsdom)
+npm run typecheck
+npm run live-check   # labelled samples through your Laya server: accuracy + latency
+                     #   npm run live-check -- http://localhost:8002 typed-decisions
+npm run e2e          # loads dist/ into Chromium and checks a test page end to end
+                     #   needs: npm run build, Laya running, npx playwright install chromium
+```
+
+Last live check (english checkpoint, CPU): 12/12 correct, ~0.5 s per element.
+
 ## Future work
 
 ### Laya API authentication

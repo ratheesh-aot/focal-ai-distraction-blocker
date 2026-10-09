@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>E2E news page</title>
+  <style>
+    body { font-family: Georgia, serif; margin: 0; }
+    header { padding: 16px; background: #eee; }
+    article { max-width: 700px; margin: 24px auto; line-height: 1.6; }
+    #consent { position: fixed; bottom: 0; left: 0; right: 0; height: 180px; background: #222; color: #fff; padding: 16px; z-index: 99999; }
+    .cb-x9 { position: fixed; inset: 20% 25%; background: #fff; border: 2px solid #333; padding: 24px; z-index: 5000; }
+  </style>
+</head>
+<body>
+  <header class="site-header">Home · News · Sport · Business</header>
+  <article id="story">
+    <h1>Council approves new budget</h1>
+    <p>The city council voted on Tuesday to approve the new budget, which allocates funds for road repairs, public
+    transport improvements, new libraries and a renovated swimming pool. Councillors debated for six hours before the
+    final vote, which passed by nine votes to four.</p>
+    <p>The mayor said the plan would be funded without raising local taxes, relying instead on savings from merged
+    departments and a new parking scheme. Opposition members argued the savings were optimistic and asked for a review
+    in six months, which the council agreed to schedule.</p>
+  </article>
+
+  <div id="consent">
+    We value your privacy. We and our partners use cookies to store and access information on your device.
+    <button id="accept" onclick="window.__choice='accept'">Accept all</button>
+    <button id="reject" onclick="window.__choice='reject'">Reject all</button>
+  </div>
+
+  <script>
+    // A signup popup with no tell-tale class names, injected late: only the model can judge it.
+    setTimeout(() => {
+      const d = document.createElement('div');
+      d.className = 'cb-x9';
+      d.id = 'late-popup';
+      d.innerHTML = "<h2>Don't miss out!</h2><p>Get our best stories delivered to your inbox every morning.</p><button>Subscribe</button><button>No thanks</button>";
+      document.body.appendChild(d);
+    }, 800);
+  </script>
+</body>
+</html>

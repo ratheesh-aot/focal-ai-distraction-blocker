@@ -1,6 +1,8 @@
 export function hostOf(url: string): string {
   try {
-    return new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+    const u = new URL(url);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+    return u.hostname.toLowerCase().replace(/^www\./, '');
   } catch {
     return '';
   }

@@ -8,12 +8,14 @@
     "build": "npm run rules && vite build && vite build -c vite.content.config.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "live-check": "tsx scripts/live-model-check.ts"
+    "live-check": "tsx scripts/live-model-check.ts",
+    "e2e": "tsx scripts/e2e.ts"
   },
   "devDependencies": {
     "@types/chrome": "^0.3.5",
     "@types/node": "^26.6.5",
     "jsdom": "^29.1.1",
+    "playwright": "^1.64.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",

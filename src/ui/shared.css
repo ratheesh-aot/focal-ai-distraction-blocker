@@ -65,3 +65,4 @@ button:disabled { opacity: .6; cursor: default; }
 .dot.ratelimited { background: var(--warn); }
 .error { color: var(--bad); }
 .success { color: var(--ok); }
+[hidden] { display: none !important; }

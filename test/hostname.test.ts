@@ -17,3 +17,9 @@ it('treats a disabled site as covering its subdomains only', () => {
   expect(isSiteDisabled('badexample.com', ['example.com'])).toBe(false);
   expect(isSiteDisabled('example.com', [])).toBe(false);
 });
+
+it('returns empty string for non-web pages', () => {
+  expect(hostOf('chrome-extension://abcdef/popup/index.html')).toBe('');
+  expect(hostOf('chrome://settings')).toBe('');
+  expect(hostOf('file:///C:/x.html')).toBe('');
+});
