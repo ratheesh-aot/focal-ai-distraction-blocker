@@ -145,19 +145,19 @@ async function start(): Promise<void> {
     if (Object.keys(learned).length) void send({ type: 'remember', url, entries: learned }).catch(() => {});
   }
 
-  async function scan(roots?: Element[]): Promise<void> {
-    const ask = triage(roots);
-    report();
-    if (ask.length === 0) return;
-    await askModel(ask);
-    report();
+  /**
+   * Local triage runs immediately on every scan; model calls run alongside it so a slow
+   * model never delays hiding an obvious distraction. `seen` prevents duplicate asks.
+   */
+  function queueScan(roots?: Element[]): void {
+    try {
+      const ask = triage(roots);
+      report();
+      if (ask.length) void askModel(ask).then(report, (e) => console.debug('[adb] model step failed', e));
+    } catch (e) {
+      console.debug('[adb] scan failed', e);
+    }
   }
-
-  // Serialise scans so a slow model call never overlaps another scan of the same elements.
-  let running: Promise<void> = Promise.resolve();
-  const queueScan = (roots?: Element[]) => {
-    running = running.then(() => scan(roots)).catch((e) => console.debug('[adb] scan failed', e));
-  };
 
   let pendingRoots = new Set<Element>();
   let timer: ReturnType<typeof setTimeout> | null = null;

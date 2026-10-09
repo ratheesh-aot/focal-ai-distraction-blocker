@@ -3,7 +3,8 @@ import type { ElementSummary, Settings, Verdict } from '../shared/types';
 import { fetchJson, ProviderError } from './errors';
 import { parseChoice, type DecisionProvider } from './provider';
 
-const MAX_BATCH = 64;
+/** laya-api accepts 64, but on CPU (~0.8 s/element) 64 would exceed its 30 s request timeout. */
+const MAX_BATCH = 24;
 const HEADERS = { 'content-type': 'application/json' };
 
 /** Laya decision server (laya-api). No authentication in v1 — see README "Future work". */
@@ -11,13 +12,19 @@ export function createLayaProvider(
   cfg: Settings['laya'],
   fetchImpl: typeof fetch = fetch,
   timeoutMs = 15000,
+  perItemMs = 1500,
 ): DecisionProvider {
   const base = cfg.baseUrl.replace(/\/+$/, '');
   const questions = buildQuestions();
   let batchSupported = true;
 
-  const post = (path: string, body: unknown) =>
-    fetchJson(fetchImpl, `${base}${path}`, { method: 'POST', headers: HEADERS, body: JSON.stringify(body) }, timeoutMs);
+  const post = (path: string, body: unknown, items = 1) =>
+    fetchJson(
+      fetchImpl,
+      `${base}${path}`,
+      { method: 'POST', headers: HEADERS, body: JSON.stringify(body) },
+      timeoutMs + perItemMs * items,
+    );
 
   async function decideOne(state: ElementSummary): Promise<Verdict | null> {
     const res = (await post('/v1/predict', { state, questions, model: cfg.model })) as { answers?: { kind?: unknown } };
@@ -27,7 +34,7 @@ export function createLayaProvider(
   async function decideChunk(chunk: ElementSummary[]): Promise<(Verdict | null)[]> {
     if (batchSupported) {
       try {
-        const res = (await post('/v1/predict/batch', { states: chunk, questions, model: cfg.model })) as {
+        const res = (await post('/v1/predict/batch', { states: chunk, questions, model: cfg.model }, chunk.length)) as {
           results?: { answers?: { kind?: unknown } }[];
         };
         if (!Array.isArray(res?.results) || res.results.length !== chunk.length) {

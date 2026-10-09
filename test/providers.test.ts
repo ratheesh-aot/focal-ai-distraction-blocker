@@ -51,10 +51,10 @@ describe('Laya provider', () => {
     expect(verdicts).toEqual([{ label: 'ad', confidence: 0.8 }, { label: 'ad', confidence: 0.8 }]);
   });
 
-  it('splits more than 64 states into chunks and keeps the order', async () => {
+  it('splits large requests into chunks of 24 (laya-api on CPU times out at 30 s) and keeps the order', async () => {
     const f = fakeFetch((c) => json({ results: c.body.states.map((s: ElementSummary) => ({ answers: answer(s.text === 'item 69' ? 'chat_widget' : 'ad') })) }));
     const verdicts = await createLayaProvider(laya, f.impl).decide(states(70));
-    expect(f.calls.map((c) => c.body.states.length)).toEqual([64, 6]);
+    expect(f.calls.map((c) => c.body.states.length)).toEqual([24, 24, 22]);
     expect(verdicts).toHaveLength(70);
     expect(verdicts[69]?.label).toBe('chat_widget');
   });
@@ -96,6 +96,23 @@ describe('Laya provider', () => {
     const impl = ((_u: string, init: RequestInit) =>
       new Promise((_r, reject) => init.signal!.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError'))))) as typeof fetch;
     await expect(createLayaProvider(laya, impl, 10).decide(states(1))).rejects.toMatchObject({ kind: 'timeout' });
+  });
+
+  it('gives bigger chunks proportionally more time before timing out', async () => {
+    // Answers after 120 ms unless aborted first.
+    const impl = ((_u: string, init: RequestInit) =>
+      new Promise((resolve, reject) => {
+        const body = JSON.parse(String(init.body));
+        const t = setTimeout(() => resolve(json({ results: body.states.map(() => ({ answers: answer('ad') })) })), 120);
+        init.signal!.addEventListener('abort', () => {
+          clearTimeout(t);
+          reject(new DOMException('aborted', 'AbortError'));
+        });
+      })) as typeof fetch;
+    // 10 ms base budget + 50 ms per element: 4 elements get 210 ms, enough for a 120 ms answer.
+    expect(await createLayaProvider(laya, impl, 10, 50).decide(states(4))).toHaveLength(4);
+    // 1 element gets 60 ms: too slow.
+    await expect(createLayaProvider(laya, impl, 10, 50).decide(states(1))).rejects.toMatchObject({ kind: 'timeout' });
   });
 
   it('returns null for an answer it cannot read', async () => {
